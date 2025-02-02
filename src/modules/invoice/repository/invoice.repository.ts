@@ -2,33 +2,37 @@ import Address from "../../@shared/domain/value-object/address";
 import Id from "../../@shared/domain/value-object/id.value-object";
 import Invoice from "../domain/invoice.entity";
 import InvoiceGateway from "../gateway/invoice.gateway";
-import { InvoiceItemModel } from "./invoice-item.model";
-import { InvoiceModel } from "./invoice.model";
+import InvoiceItemModel from "./invoice-item.model";
+import InvoiceModel from "./invoice.model";
 
 export default class InvoiceRepository implements InvoiceGateway {
   async generate(invoice: Invoice): Promise<Invoice> {
-    const result = await InvoiceModel.create({
-      id: invoice.id.id,
-      name: invoice.name,
-      document: invoice.document,
-      street: invoice.address.street,
-      number: invoice.address.number,
-      complement: invoice.address.complement,
-      city: invoice.address.city,
-      state: invoice.address.state,
-      zipCode: invoice.address.zipCode,
-      createdAt: invoice.createdAt,
-      updatedAt: invoice.updatedAt,
-    });
-
-    for (const item of invoice.items) {
-      await InvoiceItemModel.create({
-        id: item.id.id,
-        invoice_id: invoice.id.id,
-        name: item.name,
-        price: item.price,
-      });
-    }
+    const result = await InvoiceModel.create(
+      {
+        id: invoice.id.id,
+        name: invoice.name,
+        document: invoice.document,
+        street: invoice.address.street,
+        number: invoice.address.number,
+        complement: invoice.address.complement,
+        city: invoice.address.city,
+        state: invoice.address.state,
+        zipcode: invoice.address.zipCode,
+        createdAt: invoice.createdAt,
+        updatedAt: invoice.updatedAt,
+        total: invoice.items.reduce((acc, item) => acc + item.price, 0),
+        items: invoice.items.map((item) => {
+          return {
+            id: item.id.id,
+            name: item.name,
+            price: item.price,
+          };
+        }),
+      },
+      {
+        include: [InvoiceItemModel],
+      }
+    );
 
     return invoice;
   }
