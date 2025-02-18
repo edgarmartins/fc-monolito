@@ -5,9 +5,7 @@ import ClientGateway from "../gateway/client.gateway";
 import { ClientModel } from "./client.model";
 
 export default class ClientRepository implements ClientGateway {
-
-  async add(entity: Client): Promise<void> {
-
+  async add(entity: Client): Promise<Client> {
     await ClientModel.create({
       id: entity.id.id,
       name: entity.name,
@@ -20,16 +18,34 @@ export default class ClientRepository implements ClientGateway {
       state: entity.address.state,
       zipcode: entity.address.zipCode,
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
-    })
+      updatedAt: entity.updatedAt,
+    });
+
+    const result = await ClientModel.findByPk(entity.id.id);
+
+    return new Client({
+      id: new Id(result.id),
+      name: result.name,
+      email: result.email,
+      document: result.document,
+      address: new Address(
+        result.street,
+        result.number,
+        result.complement,
+        result.city,
+        result.state,
+        result.zipcode
+      ),
+      createdAt: result.createdAt,
+      updatedAt: result.createdAt,
+    });
   }
 
   async find(id: string): Promise<Client> {
-
-    const client = await ClientModel.findOne({ where: { id } })
+    const client = await ClientModel.findOne({ where: { id } });
 
     if (!client) {
-      throw new Error("Client not found")
+      throw new Error("Client not found");
     }
 
     return new Client({
@@ -43,10 +59,10 @@ export default class ClientRepository implements ClientGateway {
         client.complement,
         client.city,
         client.state,
-        client.zipcode,
+        client.zipcode
       ),
       createdAt: client.createdAt,
-      updatedAt: client.createdAt
-    })
+      updatedAt: client.createdAt,
+    });
   }
 }

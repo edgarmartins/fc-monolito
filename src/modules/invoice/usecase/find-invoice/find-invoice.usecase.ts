@@ -1,4 +1,3 @@
-import Address from "../../../@shared/domain/value-object/address";
 import InvoiceGateway from "../../gateway/invoice.gateway";
 import {
   FindInvoiceUseCaseInputDTO,
@@ -6,34 +5,34 @@ import {
 } from "./find-invoice.dto";
 
 export default class FindInvoiceUseCase {
-  constructor(private readonly _invoiceRepository: InvoiceGateway) {}
+  constructor(private _invoiceRepository: InvoiceGateway) {}
 
   async execute(
     input: FindInvoiceUseCaseInputDTO
   ): Promise<FindInvoiceUseCaseOutputDTO> {
-    const invoice = await this._invoiceRepository.find(input.id);
+    const result = await this._invoiceRepository.find(input.id);
 
     return {
-      id: invoice.id.id,
-      name: invoice.name,
-      document: invoice.document,
+      id: result.id.id,
+      name: result.name,
+      document: result.document,
       address: {
-        street: invoice.address.street,
-        number: invoice.address.number,
-        complement: invoice.address.complement,
-        city: invoice.address.city,
-        state: invoice.address.state,
-        zipCode: invoice.address.zipCode,
+        street: result.address.street,
+        number: result.address.number,
+        complement: result.address.complement,
+        city: result.address.city,
+        state: result.address.state,
+        zipCode: result.address.zipCode,
       },
-      items: invoice.items.map((item) => {
+      items: result.items.map((item) => {
         return {
           id: item.id.id,
           name: item.name,
           price: item.price,
         };
       }),
-      total: invoice.items.reduce((acc, item) => acc + item.price, 0),
-      createdAt: invoice.createdAt,
+      total: result.items.reduce((acc, item) => acc + item.price, 0),
+      createdAt: result.createdAt,
     };
   }
 }

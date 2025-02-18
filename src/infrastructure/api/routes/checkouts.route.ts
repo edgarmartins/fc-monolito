@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
-import CheckoutFacadeFactory from "../../../modules/checkout/factory/checkout.facade.factory";
+import PlaceOrderFacadeFactory from "../../../modules/checkout/factory/place-order.facade.factory";
 
 export const checkoutsRoute = express.Router();
 
 checkoutsRoute.post("/", async (req: Request, res: Response) => {
   try {
-    const usecase = CheckoutFacadeFactory.create();
+    const usecase = PlaceOrderFacadeFactory.create();
     const checkoutDto = {
       clientId: req.body.clientId,
       products: req.body.products.map((p: any) => {
@@ -14,20 +14,10 @@ checkoutsRoute.post("/", async (req: Request, res: Response) => {
         };
       }),
     };
-    const output = await usecase.execute(checkoutDto);
+    const output = await usecase.create(checkoutDto);
 
     res.send(output);
   } catch (err) {
     res.status(500).send(err);
   }
 });
-
-// checkoutsRoute.get("/:clientID", async (req: Request, res: Response) => {
-//   const usecase = new FindClientUseCase(new ClientRepository());
-//   const input = { id: req.params.clientID };
-//   const output = await usecase.execute(input);
-
-//   res.format({
-//     json: async () => res.send(output),
-//   });
-// });

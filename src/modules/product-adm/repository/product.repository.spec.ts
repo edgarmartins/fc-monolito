@@ -44,7 +44,7 @@ describe("ProductRepository test", () => {
     expect(productProps.description).toEqual(productDb.description);
     expect(productProps.purchasePrice).toEqual(productDb.purchasePrice);
     expect(productProps.stock).toEqual(productDb.stock);
-  });
+  }, 5000);
 
   it("should find a product", async () => {
     const productRepository = new ProductRepository();

@@ -5,10 +5,10 @@ import {
   PrimaryKey,
   Table,
 } from "sequelize-typescript";
-import InvoiceItemModel from "./invoice-item.model";
+import InvoiceItemsModel from "./invoice-items.model";
 
 @Table({
-  tableName: "invoice",
+  tableName: "invoices",
   timestamps: false,
 })
 export default class InvoiceModel extends Model {
@@ -28,7 +28,7 @@ export default class InvoiceModel extends Model {
   @Column({ allowNull: false })
   number: string;
 
-  @Column({ allowNull: true })
+  @Column({ allowNull: false })
   complement: string;
 
   @Column({ allowNull: false })
@@ -38,14 +38,14 @@ export default class InvoiceModel extends Model {
   state: string;
 
   @Column({ allowNull: false })
-  zipcode: string;
+  zipCode: string;
 
-  @HasMany(() => InvoiceItemModel)
-  items: InvoiceItemModel[];
+  @HasMany(() => InvoiceItemsModel)
+  items: InvoiceItemsModel[];
 
-  @Column({ allowNull: false })
+  @Column({ allowNull: false, field: "created_at" })
   createdAt: Date;
 
-  @Column({ allowNull: false })
+  @Column({ allowNull: false, field: "updated_at" })
   updatedAt: Date;
 }

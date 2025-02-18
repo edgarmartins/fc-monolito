@@ -1,13 +1,24 @@
-import Address from "../../../modules/@shared/domain/value-object/address";
-import { app, sequelize } from "../express";
+import { Sequelize } from "sequelize-typescript";
 import request from "supertest";
+import { ClientModel } from "../../../modules/client-adm/repository/client.model";
+import { app } from "../express";
 
 describe("E2E test for clients", () => {
+  let sequelize: Sequelize;
+
   beforeEach(async () => {
-    await sequelize.sync({ force: true });
+    sequelize = new Sequelize({
+      dialect: "sqlite",
+      storage: ":memory:",
+      logging: false,
+      sync: { force: true },
+    });
+
+    await sequelize.addModels([ClientModel]);
+    await sequelize.sync();
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await sequelize.close();
   });
 
@@ -27,6 +38,8 @@ describe("E2E test for clients", () => {
           zipCode: "00000-000",
         },
       });
+
+    expect(response.status).toBe(200);
 
     expect(response.status).toBe(200);
     expect(response.body.name).toBe("Antonio Oliveira");

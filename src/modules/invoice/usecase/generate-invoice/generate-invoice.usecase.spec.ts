@@ -1,77 +1,73 @@
+import Address from "../../../@shared/domain/value-object/address";
 import Id from "../../../@shared/domain/value-object/id.value-object";
+import Invoice from "../../domain/invoice";
+import InvoiceItems from "../../domain/invoice-items";
 import GenerateInvoiceUseCase from "./generate-invoice.usecase";
 
-const input = {
-  name: "Antonio",
-  document: "123123",
-  street: "Avenida",
-  number: "123",
-  complement: "Rua sem saida",
-  city: "Algum lugar",
-  state: "AA",
-  zipCode: "00000-000",
+const invoice = new Invoice({
+  id: new Id("1"),
+  name: "John Doe",
+  document: "123456789",
+  address: new Address(
+    "Street",
+    "123",
+    "Complement",
+    "City",
+    "State",
+    "12345678"
+  ),
   items: [
-    {
-      id: "1",
+    new InvoiceItems({
+      id: new Id("1"),
       name: "Item 1",
-      price: 10,
-    },
-    {
-      id: "2",
-      name: "Item 2",
-      price: 20,
-    },
+      price: 100,
+    }),
   ],
-};
-
-const output = {
-  id: new Id("123"),
-  name: "Antonio",
-  document: "123123",
-  street: "Avenida",
-  number: "123",
-  complement: "Rua sem saida",
-  city: "Algum lugar",
-  state: "AA",
-  zipCode: "00000-000",
-  items: [
-    {
-      id: "1",
-      name: "Item 1",
-      price: 10,
-    },
-    {
-      id: "2",
-      name: "Item 2",
-      price: 20,
-    },
-  ],
-};
+});
 
 const MockRepository = () => {
   return {
-    find: jest.fn().mockReturnValue(Promise.resolve(output)),
-    generate: jest.fn().mockReturnValue(Promise.resolve(output)),
+    find: jest.fn(),
+    generate: jest.fn().mockReturnValue(Promise.resolve(invoice)),
   };
 };
 
-describe("generate invoice usecase", () => {
+describe("Invoice usecase unit test", () => {
   it("should generate a invoice", async () => {
     const invoiceRepository = MockRepository();
-
     const usecase = new GenerateInvoiceUseCase(invoiceRepository);
+    const input = {
+      name: "John Doe",
+      document: "123456789",
+      street: "Street",
+      number: "123",
+      complement: "Complement",
+      city: "City",
+      state: "State",
+      zipCode: "12345678",
+      items: [
+        {
+          id: "1",
+          name: "Item 1",
+          price: 100,
+        },
+      ],
+    };
+
     const result = await usecase.execute(input);
 
-    expect(invoiceRepository.generate).toHaveBeenCalled();
-    expect(result.id).toBe("123");
-    expect(result.name).toBe("Antonio");
-    expect(result.document).toBe("123123");
-    expect(result.city).toBe("Algum lugar");
-    expect(result.complement).toBe("Rua sem saida");
+    expect(result.id).toBe("1");
+    expect(result.name).toBe("John Doe");
+    expect(result.document).toBe("123456789");
+    expect(result.street).toBe("Street");
     expect(result.number).toBe("123");
-    expect(result.state).toBe("AA");
-    expect(result.street).toBe("Avenida");
-    expect(result.zipCode).toBe("00000-000");
-    expect(result.total).toBe(30);
+    expect(result.complement).toBe("Complement");
+    expect(result.city).toBe("City");
+    expect(result.state).toBe("State");
+    expect(result.zipCode).toBe("12345678");
+    expect(result.items[0].id).toBe("1");
+    expect(result.items[0].name).toBe("Item 1");
+    expect(result.items[0].price).toBe(100);
+    expect(result.total).toBe(100);
   });
 });

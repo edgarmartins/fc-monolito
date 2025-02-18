@@ -1,33 +1,28 @@
 import Address from "../../../@shared/domain/value-object/address";
 import Id from "../../../@shared/domain/value-object/id.value-object";
-import Invoice from "../../domain/invoice.entity";
+import Invoice from "../../domain/invoice";
+import InvoiceItems from "../../domain/invoice-items";
+import GenerateInvoiceUseCase from "../generate-invoice/generate-invoice.usecase";
 import FindInvoiceUseCase from "./find-invoice.usecase";
 
 const invoice = new Invoice({
-  id: new Id("123"),
-  name: "Antonio",
-  document: "123123",
+  id: new Id("1"),
+  name: "John Doe",
+  document: "123456789",
   address: new Address(
-    "Avenida",
+    "Street",
     "123",
-    "Rua sem saida",
-    "Algum lugar",
-    "AA",
-    "00000-000"
+    "Complement",
+    "City",
+    "State",
+    "12345678"
   ),
-  createdAt: new Date(),
-  updatedAt: new Date(),
   items: [
-    {
+    new InvoiceItems({
       id: new Id("1"),
       name: "Item 1",
-      price: 10,
-    },
-    {
-      id: new Id("2"),
-      name: "Item 2",
-      price: 20,
-    },
+      price: 100,
+    }),
   ],
 });
 
@@ -38,23 +33,47 @@ const MockRepository = () => {
   };
 };
 
-describe("find invoice usecase", () => {
+describe("Invoice usecase unit test", () => {
   it("should find a invoice", async () => {
     const invoiceRepository = MockRepository();
+    const invoiceGenerateUsecase = new GenerateInvoiceUseCase(
+      invoiceRepository
+    );
+    const input = {
+      name: "John Doe",
+      document: "123456789",
+      street: "Street",
+      number: "123",
+      complement: "Complement",
+      city: "City",
+      state: "State",
+      zipCode: "12345678",
+      items: [
+        {
+          id: "1",
+          name: "Item 1",
+          price: 100,
+        },
+      ],
+    };
+
+    await invoiceGenerateUsecase.execute(input);
 
     const usecase = new FindInvoiceUseCase(invoiceRepository);
-    const input = { id: "123" };
-    const result = await usecase.execute(input);
+    const result = await usecase.execute({ id: "1" });
 
-    expect(invoiceRepository.find).toHaveBeenCalled();
-    expect(result.id).toBe("123");
-    expect(result.name).toBe("Antonio");
-    expect(result.document).toBe("123123");
-    expect(result.address.city).toBe("Algum lugar");
-    expect(result.address.complement).toBe("Rua sem saida");
+    expect(result.id).toBe("1");
+    expect(result.name).toBe("John Doe");
+    expect(result.document).toBe("123456789");
+    expect(result.address.street).toBe("Street");
     expect(result.address.number).toBe("123");
-    expect(result.address.state).toBe("AA");
-    expect(result.address.street).toBe("Avenida");
-    expect(result.address.zipCode).toBe("00000-000");
+    expect(result.address.complement).toBe("Complement");
+    expect(result.address.city).toBe("City");
+    expect(result.address.state).toBe("State");
+    expect(result.address.zipCode).toBe("12345678");
+    expect(result.items[0].id).toBe("1");
+    expect(result.items[0].name).toBe("Item 1");
+    expect(result.items[0].price).toBe(100);
+    expect(result.total).toBe(100);
   });
 });

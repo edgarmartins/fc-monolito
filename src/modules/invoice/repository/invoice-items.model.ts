@@ -9,10 +9,10 @@ import {
 import InvoiceModel from "./invoice.model";
 
 @Table({
-  tableName: "invoice_item",
+  tableName: "invoice_items",
   timestamps: false,
 })
-export default class InvoiceItemModel extends Model {
+export default class InvoiceItemsModel extends Model {
   @PrimaryKey
   @Column({ allowNull: false })
   id: string;

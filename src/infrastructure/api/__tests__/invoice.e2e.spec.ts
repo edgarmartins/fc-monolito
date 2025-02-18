@@ -1,12 +1,25 @@
-import { app, sequelize } from "../express";
+import { Sequelize } from "sequelize-typescript";
 import request from "supertest";
+import InvoiceModel from "../../../modules/invoice/repository/invoice.model";
+import { app } from "../express";
+import InvoiceItemsModel from "../../../modules/invoice/repository/invoice-items.model";
 
 describe("E2E test for invoices", () => {
+  let sequelize: Sequelize;
+
   beforeEach(async () => {
-    await sequelize.sync({ force: true });
+    sequelize = new Sequelize({
+      dialect: "sqlite",
+      storage: ":memory:",
+      logging: false,
+      sync: { force: true },
+    });
+
+    await sequelize.addModels([InvoiceModel, InvoiceItemsModel]);
+    await sequelize.sync();
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await sequelize.close();
   });
 
