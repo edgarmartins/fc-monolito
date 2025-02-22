@@ -1,27 +1,33 @@
-import { Sequelize } from "sequelize-typescript";
 import request from "supertest";
 import { ClientModel } from "../../../modules/client-adm/repository/client.model";
-import { app } from "../express";
 import { ProductModel as AdmProductModel } from "../../../modules/product-adm/repository/product.model";
 import ProductModel from "../../../modules/store-catalog/repository/product.model";
+import { app } from "../express";
+import { Migrator } from "../migrator";
+import InvoiceModel from "../../../modules/invoice/repository/invoice.model";
+import InvoiceItemsModel from "../../../modules/invoice/repository/invoice-items.model";
+import TransactionModel from "../../../modules/payment/repository/transaction.model";
 
 describe("E2E test for checkouts", () => {
-  let sequelize: Sequelize;
+  let migrator: Migrator;
 
   beforeEach(async () => {
-    sequelize = new Sequelize({
-      dialect: "sqlite",
-      storage: ":memory:",
-      logging: false,
-      sync: { force: true },
+    migrator = new Migrator({
+      models: [
+        ClientModel,
+        AdmProductModel,
+        ProductModel,
+        InvoiceModel,
+        InvoiceItemsModel,
+        TransactionModel,
+      ],
     });
 
-    await sequelize.addModels([ClientModel, AdmProductModel, ProductModel]);
-    await sequelize.sync();
+    await migrator.up();
   });
 
   afterEach(async () => {
-    await sequelize.close();
+    await migrator.down();
   });
 
   it("should create a checkout", async () => {
@@ -40,6 +46,9 @@ describe("E2E test for checkouts", () => {
           zipCode: "00000-000",
         },
       });
+
+    expect(client).toBeDefined();
+    expect(client.body.id).toBeDefined();
 
     const product = await request(app).post("/products").send({
       name: "Product",
